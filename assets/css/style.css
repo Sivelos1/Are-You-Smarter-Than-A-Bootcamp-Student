@@ -9,6 +9,7 @@ body{
 section{
     display: flex;
     justify-self: center;
+    flex-direction: column;
 }
 
 .question-holder li{
@@ -25,7 +26,7 @@ button{
     margin:5px;
 }
 button:hover{
-    background-color: chocolate;
+    scale: 105%;
 }
 
 #start{
@@ -33,10 +34,17 @@ button:hover{
 }
 #quiz{
     display: block;
+    justify-content: center;
     padding: 0% 5% 0% 5%;
+}
+#quiz div{
+    display:flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 #quiz div div{
     display:flex;
+    flex-wrap: nowrap;
 }
 #quiz div div h1{
     font-size: 200%;
@@ -49,4 +57,28 @@ button:hover{
 }
 #results{
     display:none;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
+#displayScore{
+    font-size: 200%;
+}
+#scoreboard{
+    min-height: 150px;
+    height:fit-content;
+    width:500px;
+    background-color: lightgray;
+    border-radius: 10px;
+    flex-direction: column;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+#results div{
+    display:flex;
+    padding: 5%;
+    flex-direction: column;
+    align-items: center;
 }
