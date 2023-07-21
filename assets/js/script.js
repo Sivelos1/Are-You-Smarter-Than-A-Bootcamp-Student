@@ -9,6 +9,7 @@ var questions = {
             [1]:"\'==\' compares type, and \'===\' checks for value.",
             [2]:"\'==\' compares value, and \'===\' checks if it has the opposite value.",
             [3]:"\'==\' compares value, and \'===\' compares both value and type.",
+            count:4
         }
     },
     [1]: {
@@ -17,6 +18,7 @@ var questions = {
         answers:{
             [0]:"True",
             [1]:"False",
+            count:2
         }
     },
     [2]: {
@@ -27,6 +29,7 @@ var questions = {
             [1]:"After the body",
             [2]:"Whenever it needs to be used",
             [3]:"In the footer element",
+            count:4
         }
     },
     [3]: {
@@ -37,6 +40,7 @@ var questions = {
             [1]:"The SUB",
             [2]:"The DOM",
             [3]:"The SWS",
+            count:4
         }
     },
     [4]: {
@@ -45,10 +49,15 @@ var questions = {
         answers:{
             [0]:"True",
             [1]:"False",
+            count:2
         }
     },
     length: 4
 }
+
+
+var line = $('<span>');
+line.addClass('line');
 
 var questionIndex = 0;
 
@@ -61,197 +70,46 @@ var scoreHolders = {
 }
 
 var timer = 0;
+var score = 0;
 var timerLength = 30;
+var answerIndex = -1;
 
-var holderStart = document.querySelector("#start");
-var holderQuiz = document.querySelector("#quiz");
-var holderResults = document.querySelector("#enterYourName");
-var holderResults = document.querySelector("#results");
-var questionHolder = document.querySelector("#quiz div div");
-var questionAnswerHolder = document.querySelector("#quiz div ul");
+var master = $('#master');
 
-var startButton = document.querySelector("#start_button");
-var timerEl = document.querySelector("#timer");
-var questionNumber = document.querySelector("#question-number");
-var questionText = document.querySelector("#question-text");
+var timerEl = null;
 
-var scoreBoard = document.querySelector("#scoreboard");
-var scoreName = document.querySelector("#submitName");
-var submitScore = document.querySelector("#submitScore");
-var displayScore = document.querySelector("#displayScore");
+var GetCurrentQuestion = function(){
+    return questions[questionIndex];
+}
 
-var nextquestion = document.querySelector("#next-question");
-var questionAnswered = false;
-var answeredCorrectly = false;
-var submitted = false;
-
-updateDisplays = function(gameState){
-    console.log("current state: "+gameState);
-    holderStart.style.display = "none";
-    holderQuiz.style.display = "none";
-    holderResults.style.display = "none";
-    switch (gameState) {
-        case "results":
-            updateResults();
-            holderResults.style.display = "flex";
-            break;
-        case "quiz":
-            updateQuestion();
-            holderQuiz.style.display = "flex";
-            break;
-        case "start":
-        default:
-            holderStart.style.display = "flex";
-            break;
+var ClearMaster = function(){
+    if(master.children() !== null && master.children !== undefined){
+        var i = master.children().length;
+        master.children().remove();
+        console.log("Clearing "+i+" children from #master.")
+    }else{
+        console.log("#master has no children to remove.")
     }
 }
 
-updateDisplays(gamestate);
-
-startGame = function(){
-    score = 0;
-    questionIndex = 0;
-    setTime();
-    answeredCorrectly = false;
-    questionAnswered = false;
-    gamestate = "quiz";
-    updateDisplays(gamestate);
-};
-
-startButton.addEventListener("click", startGame);
-
 function setTime() {
     // Sets interval in variable
-    
-    timer = timerLength;
-    timerEl.textContent = timer+" second(s) left";
     var timerInterval = setInterval(function() {
       timer--;
-      timerEl.textContent = timer+" second(s) left";
+      if(timerEl !== null || timerEl !== undefined){
+        timerEl.text(timer+' second(s) left')
+      }
+  
       if(timer === 0) {
         clearInterval(timerInterval);
-        updateDisplays("results");
+        gamestate = "results";
+        UpdateDisplays();
       }
   
     }, 1000);
   }
 
-  function updateQuestion(){
-    var question = questions[questionIndex];
-    questionText.textContent = question.text
-    questionNumber.textContent = "Question "+(questionIndex+1);
-    disableButton(nextquestion, "true");
-    var answers = document.querySelectorAll(".question-answer")
-    iterateAnswers(function(element, index){
-        if(question.answers[index]!= null){
-            
-            disableButton(element, "false");
-            element.style.display = "flex";
-            element.textContent = question.answers[index];
-        }
-        else{
-            disableButton(nextquestion, "true");
-            element.style.display = "none";
-        }
-    })
-  }
-
-  var iterateAnswers = function(func){
-    var answers = document.querySelectorAll(".question-answer")
-    for (let index = 0; index < answers.length; index++) {
-        const element = answers[index];
-        func(element, index);
-    }
-}
-
-var disableButton = function(element, state){
-    element.setAttribute("disable", state);
-    if(state === "true"){
-        element.style.backgroundColor = "lightGray";
-    }
-    else{
-        element.style.backgroundColor = "cadetBlue";
-    }
-
-}
-
-  var answerQuestion = function(){
-    var element = event.target;
-    answeredCorrectly = false;
-    if(element.matches("button")){
-        if((element.getAttribute("data-number") * 1) === questions[questionIndex].correctAnswerIndex){
-            answeredCorrectly = true;
-            element.style.backgroundColor = "green";
-        }
-        else{
-            element.style.backgroundColor = "red";
-        }
-    }
-    if(answeredCorrectly){
-        score++;
-    }
-    questionAnswered = true;
-    iterateAnswers(function(element, index){
-        disableButton(element, "true");
-        if((element.getAttribute("data-number") * 1) === questions[questionIndex].correctAnswerIndex){
-            element.style.backgroundColor = "green";
-        }
-        else if(element === event.target && (element.getAttribute("data-number") * 1) != questions[questionIndex].correctAnswerIndex){
-            element.style.backgroundColor = "red";
-        }
-        else
-        {
-            element.style.backgroundColor = "lightGray";
-        }
-    });
-    nextquestion.setAttribute("disable", "false");
-  }
-
-  questionAnswerHolder.addEventListener("click", answerQuestion);
-  nextquestion.addEventListener("click", function(){
-    if(event.target.getAttribute("disable") === "false"){
-        var nextState = "quiz";
-        if(questionIndex >= questions.length){
-            timer = -1;
-            nextState = "results";
-        }
-        else{
-            questionIndex++;
-        }
-        updateDisplays(nextState);
-    }
-  });
-
-  submitScore.addEventListener("click", function(){
-    var n = scoreName.value;
-    AddScoreHolder(n, score);
-    submitted = true;
-    updateResults();
-  });
-
-  var updateResults = function(){
-    displayScore.textContent = score + " / " + (questions.length+1)
-    scoreHolders = GetScoreHolders();
-    if(submitted === true){
-        submitScore.style.display = "none";
-    }
-    for (let index = 0; index < scoreBoard.childNodes.length; index++) {
-        const element = scoreBoard.childNodes[index];
-        console.log(element);
-        element.innerHTML = "";
-    }
-    for (let index = 0; index < scoreHolders.holders+1; index++) {
-        const element = scoreHolders[index];
-        if(element != null){
-            console.log(element);
-            var newElement = document.createElement("span");
-            newElement.appendChild(document.createTextNode("\n"+element.name+"\'s Score: "+element.score + " / " + (questions.length+1)));
-            scoreBoard.appendChild(newElement);
-        }
-    }
-  }
-
-  var GetScoreHolders = function(){
+var GetScoreHolders = function(){
     var result = localStorage.getItem("results");
     if(result === null){
         result = JSON.stringify(scoreHolders);
@@ -260,16 +118,348 @@ var disableButton = function(element, state){
     return JSON.parse(result);
   }
 
-  var AddScoreHolder = function(_name, _score){
-    scoreHolders[scoreHolders.holders] = {
-        name:_name,
-        score:_score
-    }
-    scoreHolders.holders++;
+  var ResetScoreHolders = function(){
+    
+    localStorage.removeItem("results");
+    scoreHolders = {
+        [0]:{
+            name:"Azzi",
+            score:5,
+        },
+        holders:1
+    };
     SaveScoreHolders();
   }
 
-  var SaveScoreHolders = function(){
-    var strang = JSON.stringify(scoreHolders);
-    localStorage.setItem("results", strang);
-  }
+var AddScoreHolder = function(_name, _score){
+scoreHolders[scoreHolders.holders] = {
+    name:_name,
+    score:_score
+}
+scoreHolders.holders++;
+SaveScoreHolders();
+}
+
+var SaveScoreHolders = function(){
+var strang = JSON.stringify(scoreHolders);
+localStorage.setItem("results", strang);
+}
+
+var CreateQuizLayout = function(){
+    ClearMaster();
+    timer = timerLength;
+    setTime();
+    master.append(CreateQuizHighScoreHolder());
+    master.append(CreateQuizQuestionHolder());
+    master.append(CreateQuizTimer());
+}
+
+var ToggleVisibility = function(element){
+    if(element.css('display') === 'none'){
+        element.css('display','flex');
+    }
+    else{
+        element.css('display','none');
+    }
+}
+
+var CreateQuizHighScoreHolder = function(){
+    var result = $('<section>[name="highScores"]');
+    var txt = $('<span>[name="toggleHighScoreList"]');
+    txt.addClass('highlightTextOnHover textPurple');
+    txt.text('View high scores');
+    var ol = $('<ol>[name="quizHighScoreList"]');
+    ol.css('display', 'none');
+    var scores = GetScoreHolders();
+    for (let index = 0; index < scores.length; index++) {
+        const element = scores[index];
+        var li = $('<li>[name="scoreHolder]');
+        li.addClass('text scoreHolder');
+        console.log("penis");
+        li.text(element.name +"\'s score: "+element.score);
+        ol.append(li);
+    }
+    
+    txt.on('click', function(){
+        ToggleVisibility(ol);
+    });
+    result.append(txt);
+    result.append(ol);
+    return result;
+
+}
+
+var ToggleButton = function(element){
+    if(element.attr('enabled') === 'true'){
+        element.removeClass('highlightBGOnHover bgPurple textWhite');
+        element.addClass('bgGray');
+        element.attr('enabled','false');
+    }
+    else{
+        element.addClass('highlightBGOnHover bgPurple textWhite');
+        element.removeClass('bgGray bgCorrect bgWrong');
+        element.attr('enabled','true');
+    }
+}
+
+var NextQuestion = function(event){
+    event.preventDefault();
+    var element = $(event.target);
+    if(element.attr('enabled') === 'true'){
+        if(questionIndex < questions.length){
+            questionIndex++;
+        }
+        else{
+            gamestate = "results";
+        }
+        UpdateDisplays();
+    }
+}
+
+var CreateQuizQuestionHolder = function(){
+    var holder = $('<section>[name="quizHolder"]');
+    holder.css('display', 'flex');
+    holder.css('padding-top','10%');
+    holder.css('flex-direction','column');
+    holder.css('justify-content', 'center');
+
+    var question = GetCurrentQuestion();
+
+    var questionText = $('<p>[name="quizQuestionText]');
+    questionText.addClass('bold large')
+    questionText.text(question.text);
+    
+    var submitButton = $('<button>[name="SubmitButton"]');
+    submitButton.addClass('btn highlightBGOnHover bgPurple textWhite m5');
+    submitButton.text('Submit');
+    submitButton.attr('enabled','true');
+    submitButton.on('click', NextQuestion);
+
+    var answerHolder = $('<div>[name=quizAnswerHolder]');
+    answerHolder.css('display', 'flex');
+    answerHolder.css('flex-direction','column');
+    answerHolder.css('flex-wrap','wrap')
+    for (let index = 0; index < question.answers.count; index++) {
+        const element = question.answers[index];
+        var answer = $('<button>[name="quizQuestionAnswer]');
+        answer.attr('index',index);
+        answer.text(element);
+        answer.attr('enabled','true');
+        answer.addClass('answer btn highlightBGOnHover bgPurple textWhite m5 p5');
+        answerHolder.append(answer);
+    }
+    answerHolder.on('click','.answer', function(event){
+        event.preventDefault();
+        if(submitButton.attr('enabled') === 'false' && $(event.target).attr('enabled') === 'true'){
+            
+            var buttonPushed = $(event.target);
+            answerIndex = (buttonPushed.attr('index')*1);
+            console.log("button "+buttonPushed.attr('index'));
+            for (let index = 0; index < answerHolder.children().length; index++) {
+                const element = $(answerHolder.children()[index]);
+                ToggleButton(element);
+                if((element.attr('index')*1) === GetCurrentQuestion().correctAnswerIndex && element !== buttonPushed){
+                    element.removeClass('bgGray');
+                    element.addClass('bgCorrect');
+                };
+            }
+            buttonPushed.removeClass('bgGray');
+            if((buttonPushed.attr('index')*1) === GetCurrentQuestion().correctAnswerIndex){
+                buttonPushed.addClass('bgCorrect');
+                score++;
+            }
+            else{
+                buttonPushed.addClass('bgWrong');
+            }
+            ToggleButton(submitButton);
+        }
+    })
+
+    ToggleButton(submitButton);
+    holder.append(questionText);
+    holder.append(line.clone());
+    holder.append(answerHolder);
+    holder.append(line.clone());
+    holder.append(submitButton);
+
+    return holder;
+}
+
+var CreateQuizTimer = function(){
+    var holder = $('<section>[name="quizTimerHolder"]');
+    timerEl = $('<span>[name="timer"');
+    timerEl.text(timer+' second(s) left');
+    holder.append(timerEl);
+    return holder;
+}
+
+var StartQuiz = function(event){
+    event.preventDefault();
+    gamestate = "quiz";
+    UpdateDisplays();
+}
+
+var CreateStart = function(){
+    var holder = $('<section>');
+    holder.css('width','100%');
+    holder.css('padding-top','10%');
+    holder.css('padding-bottom','10%');
+    holder.css('display','flex');
+    holder.css('flex-wrap','wrap');
+    holder.css('justify-content','center');
+    holder.css('align-items','center');
+    
+    var title = $('<h1>');
+    title.text('Are YOU Smarter Than A Boot-Camp Student?');
+    title.addClass('m10 bold large');
+
+    var startbtn = $('<button>');
+    startbtn.attr('enabled','true');
+    startbtn.text('BEGIN!');
+    startbtn.addClass('btn highlightBGOnHover bgPurple textWhite m5 p5');
+    startbtn.on('click', StartQuiz);
+
+    holder.append(title);
+    holder.append(startbtn);
+
+    master.append(holder);
+}
+
+var CreateResultsLayout = function(){
+    var holder = $('<section>');
+    holder.css('width','100%');
+    holder.css('padding-top','10%');
+    holder.css('padding-bottom','10%');
+    holder.css('display','flex');
+    holder.css('flex-direction','column');
+    holder.css('flex-wrap','wrap');
+    holder.css('justify-content','center');
+    holder.css('align-items','center');
+
+    var h1 = $('<h1>');
+    h1.addClass('bold large m5 text');
+    h1.text('All done!');
+
+    var p1 = $('<p>');
+    p1.addClass('m5 text');
+    p1.text('Your score is '+score + " / "+questions.length);
+
+    var inputHolder = $('<div>');
+    inputHolder.css('display','flex');
+    inputHolder.addClass('m5');
+
+    var p2 = $('<p>');
+    p2.addClass('text');
+    p2.text('Enter your name: ');
+    var input = $('<input>');
+    input.css('margin-left','5px');
+    input.attr('type','text');
+
+    inputHolder.append(p2);
+    inputHolder.append(input);
+
+    var submitBtn = $('<button>');
+    submitBtn.addClass('btn highlightBGOnHover bgPurple textWhite m5 p5');
+    submitBtn.text('Submit');
+    submitBtn.on('click',function(event){
+        event.preventDefault();
+        if(input.val() === ""){
+            confirm("Please input your name before proceeding!");
+            return;
+        }
+        else{
+            AddScoreHolder(input.val(), score);
+            SaveScoreHolders();
+            gamestate = "highScores";
+            UpdateDisplays();
+        }
+    });
+
+    holder.append(h1);
+    holder.append(p1);
+    holder.append(inputHolder);
+    holder.append(line.clone());
+    holder.append(submitBtn);
+
+    master.append(holder);
+}
+
+var CreateHighScoresLayout = function(){
+    var holder = $('<section>');
+    holder.css('width','100%');
+    holder.css('padding-top','10%');
+    holder.css('padding-bottom','10%');
+    holder.css('display','flex');
+    holder.css('flex-direction','column');
+    holder.css('flex-wrap','wrap');
+    holder.css('justify-content','center');
+    holder.css('align-items','center');
+
+    var h1 = $('<h1>');
+    h1.addClass('large bold text');
+    h1.text('High Scores');
+
+    var ol = $('<ol>[name="quizHighScoreList"]');
+    ol.css('display', 'block');
+    ol.css('width', '50%');
+    scoreHolders = GetScoreHolders();
+    for (let index = 0; index < scoreHolders.holders; index++) {
+        const element = scoreHolders[index];
+        var li = $('<li>[name="scoreHolder]');
+        li.addClass('text scoreHolder');
+        li.text(element.name +"\'s score: "+element.score);
+        ol.append(li);
+    }
+
+    var buttonHolder = $('<div>');
+    buttonHolder.css('display','flex');
+
+    var goBack = $('<button>');
+    goBack.addClass('btn highlightBGOnHover bgPurple textWhite m5 p5');
+    goBack.text('Go Back');
+    goBack.on('click',function(event){
+        event.preventDefault();
+        gamestate = "start";
+        UpdateDisplays();
+    });
+    
+    var clear = $('<button>');
+    clear.addClass('btn highlightBGOnHover bgPurple textWhite m5 p5');
+    clear.text('Clear High Scores');
+    clear.on('click',function(event){
+        event.preventDefault();
+        ResetScoreHolders();
+        UpdateDisplays();
+    });
+    buttonHolder.append(goBack);
+    buttonHolder.append(clear);
+
+    holder.append(h1);
+    holder.append(ol);
+    holder.append(line.clone());
+    holder.append(buttonHolder);
+
+    master.append(holder);
+}
+
+var UpdateDisplays = function(){
+    console.log("changing to "+gamestate);
+    ClearMaster();
+    switch (gamestate) {
+        case "highScores":
+            CreateHighScoresLayout();
+            break;
+        case "results":
+            CreateResultsLayout();
+            break;
+        case "quiz":
+            CreateQuizLayout();
+            break;
+        case "start":
+        default:
+            CreateStart();
+            break;
+    }
+}
+
+UpdateDisplays();
