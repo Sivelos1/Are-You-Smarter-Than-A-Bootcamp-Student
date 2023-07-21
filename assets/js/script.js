@@ -147,8 +147,6 @@ localStorage.setItem("results", strang);
 
 var CreateQuizLayout = function(){
     ClearMaster();
-    timer = timerLength;
-    setTime();
     master.append(CreateQuizHighScoreHolder());
     master.append(CreateQuizQuestionHolder());
     master.append(CreateQuizTimer());
@@ -170,12 +168,12 @@ var CreateQuizHighScoreHolder = function(){
     txt.text('View high scores');
     var ol = $('<ol>[name="quizHighScoreList"]');
     ol.css('display', 'none');
+    ol.css('width','200px');
     var scores = GetScoreHolders();
-    for (let index = 0; index < scores.length; index++) {
-        const element = scores[index];
+    for (let index = 0; index < scoreHolders.holders; index++) {
+        const element = scoreHolders[index];
         var li = $('<li>[name="scoreHolder]');
         li.addClass('text scoreHolder');
-        console.log("penis");
         li.text(element.name +"\'s score: "+element.score);
         ol.append(li);
     }
@@ -295,6 +293,8 @@ var CreateQuizTimer = function(){
 
 var StartQuiz = function(event){
     event.preventDefault();
+    timer = timerLength;
+    setTime();
     gamestate = "quiz";
     UpdateDisplays();
 }
@@ -342,7 +342,7 @@ var CreateResultsLayout = function(){
 
     var p1 = $('<p>');
     p1.addClass('m5 text');
-    p1.text('Your score is '+score + " / "+questions.length);
+    p1.text('Your score is '+score + " / "+(questions.length+1));
 
     var inputHolder = $('<div>');
     inputHolder.css('display','flex');
