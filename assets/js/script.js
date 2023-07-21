@@ -100,7 +100,7 @@ function setTime() {
         timerEl.text(timer+' second(s) left')
       }
   
-      if(timer === 0) {
+      if(timer === 0 && gamestate === "quiz") {
         clearInterval(timerInterval);
         gamestate = "results";
         UpdateDisplays();
