@@ -13,7 +13,7 @@ A short, five-question quiz about JavaScript.
 
 ## Installation
 
-Click on [this URL](https://sivelos1.github.io/I-Need-A-New-Password/) to visit the page.
+Click on [this URL]([https://sivelos1.github.io/I-Need-A-New-Password/](https://sivelos1.github.io/Are-You-Smarter-Than-A-Bootcamp-Student/)) to visit the page.
 
 ## Usage
 
